@@ -27,8 +27,8 @@ FROM base_package AS package
 COPY . .
 RUN python setup.py bdist_wheel --dist-dir=/tmp/dist
 
+FROM base AS release
 COPY --from=package /tmp/dist /tmp/dist
 RUN pip install /tmp/dist/*.whl
 
-CMD python -m ${PROJECT_NAME}
-
+CMD python -m alohi_server
