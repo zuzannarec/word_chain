@@ -35,7 +35,7 @@ class GameManager:
 
     async def add_game(self, email_address, game_id):
         msg = f'New game {game_id}. User {email_address}'
-        await lock.acquire()
+        await lock.acquire()  # lock is needed to guarantee exclusive access to a shared resources for the coroutine
         try:
             if email_address in self.games.keys():
                 msg = f'Reset game for user {email_address}'
