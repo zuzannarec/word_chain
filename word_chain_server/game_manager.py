@@ -2,7 +2,7 @@ import asyncio
 import datetime
 import json
 from collections import OrderedDict, defaultdict
-from random import random
+import random
 
 from word_chain_server.consts import TIMEOUT, VOWEL_LIST, BONUS_TIME, BONUS
 

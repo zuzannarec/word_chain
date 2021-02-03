@@ -29,7 +29,7 @@ async def start_game(start_game_request: StartGameRequest):
     except EmailNotValidError:
         return JSONResponse(status_code=status.HTTP_400_BAD_REQUEST, content={"Error": "Invalid email"})
     msg = await game_manager.add_game(email_address, game_id)
-    return JSONResponse(status_code=status.HTTP_200_OK, content={"gameID": game_id, "msg": msg},
+    return JSONResponse(status_code=status.HTTP_200_OK, content={"msg": msg},
                         media_type="application/json")
 
 
