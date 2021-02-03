@@ -20,6 +20,10 @@ def get_requirements():
     return [str(r) for r in parse_requirements(read('requirements.txt'))]
 
 
+additional_dependencies = [
+    'wordlist.json'
+]
+
 setup(
     name="word_chain",
     author='Zuzanna Rec',
@@ -29,6 +33,7 @@ setup(
     long_description=read('README.md'),
     long_description_content_type='text/markdown',
     packages=find_packages(exclude=['tests', 'tests.*']),
+    package_data={'': additional_dependencies},
     python_requires='>=3.9',
     install_requires=get_requirements(),
     setup_requires=['setuptools_scm'],
