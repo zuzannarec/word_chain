@@ -150,7 +150,8 @@ class GameManager:
         scores = self.scores[email_address]
         score_user = scores[0] + score_user
         score_computer = scores[1] + score_computer
-        self.scores[email_address] = [score_user, score_computer]
+        scores = [score_user, score_computer]
+        self.scores[email_address] = scores
         return scores
 
     def _check_computer_word(self, email_address, word):

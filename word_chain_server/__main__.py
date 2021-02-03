@@ -41,6 +41,7 @@ async def play_word(email_address, play_word_request: PlayWordRequest):
                             media_type="application/json")
     result = await game_manager.check_timeout(email_address)
     if not result:
+        await game_manager.reset(email_address)
         return JSONResponse(status_code=status.HTTP_400_BAD_REQUEST, content={"Error": "Timeout. Game finished."},
                             media_type="application/json")
     result = await game_manager.check_word(email_address, play_word_request.word)
