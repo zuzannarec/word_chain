@@ -1,2 +1,6 @@
 fastapi~=0.63.0
 uvicorn~=0.13.3
+pytest~=6.2.2
+setuptools~=53.0.0
+pydantic~=1.7.3
+email-validator~=1.1.2
