@@ -2,8 +2,9 @@ import asyncio
 import datetime
 import json
 from collections import OrderedDict, defaultdict
+from random import random
 
-from word_chain_server.consts import TIMEOUT, VOWEL_LIST, BONUS_TIME
+from word_chain_server.consts import TIMEOUT, VOWEL_LIST, BONUS_TIME, BONUS
 
 lock = asyncio.Lock()
 
@@ -33,12 +34,11 @@ class GameManager:
             self.words_with_scores[word] = score
 
     async def add_game(self, email_address, game_id):
+        msg = f'New game {game_id}. User {email_address}'
         await lock.acquire()
         try:
-            msg = f'New game {game_id}. User {email_address}'
             if email_address in self.games.keys():
                 msg = f'Reset game for user {email_address}'
-            print(msg)
             self.games[email_address] = game_id
             self.games_history[email_address] = OrderedDict()
             self.scores[email_address] = [0, 0]
@@ -59,8 +59,8 @@ class GameManager:
                     return False
             user_score = self.words_with_scores[word]
             if self.diff[email_address] < BONUS_TIME:
-                user_score = user_score * 1.5
-            self._update_scores(email_address, user_score, 0)
+                user_score = user_score * BONUS
+            self._update_scores(email_address, score_user=user_score)
             self.timestamps[email_address] = datetime.datetime.now()
             self.games_history[email_address][word] = None
         finally:
@@ -70,21 +70,14 @@ class GameManager:
     async def get_computer_response(self, email_address, word):
         await lock.acquire()
         try:
-            starting_letter = word[-1]
-            possible_words = self.words[starting_letter]
-            maximum_score = 0
-            result = None
-            for possible_word in possible_words:
-                if not self._check_computer_word(email_address, possible_word):
-                    continue
-                if self.words_with_scores[possible_word] > maximum_score:
-                    maximum_score = self.words_with_scores[possible_word]
-                    result = possible_word
-            self.games_history[email_address][result] = None
-            scores = self._update_scores(email_address, 0, maximum_score)
+            possible_words = self.words[word[-1]]
+            result_word = random.choice(possible_words)
+            computer_score = self.words_with_scores[result_word]
+            self.games_history[email_address][result_word] = None
+            scores = self._update_scores(email_address, score_computer=computer_score)
         finally:
             lock.release()
-        return result, scores
+        return result_word, scores
 
     async def check_user(self, email_address):
         await lock.acquire()
@@ -152,14 +145,11 @@ class GameManager:
             return None
         return word
 
-    def _update_scores(self, email_address, score_user=None, score_computer=None):
+    def _update_scores(self, email_address, score_user=0, score_computer=0):
         scores = self.scores[email_address]
-        if score_user is not None:
-            score_user = scores[0] + score_user
-        if score_computer is not None:
-            score_computer = scores[1] + score_computer
-        scores = [score_user, score_computer]
-        self.scores[email_address] = scores
+        score_user = scores[0] + score_user
+        score_computer = scores[1] + score_computer
+        self.scores[email_address] = [score_user, score_computer]
         return scores
 
     def _check_computer_word(self, email_address, word):

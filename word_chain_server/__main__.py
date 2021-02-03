@@ -5,10 +5,10 @@ import uuid
 import uvicorn
 from email_validator import validate_email, EmailNotValidError
 from fastapi import FastAPI, status
-from pydantic import BaseModel
 from starlette.responses import JSONResponse
 
 from word_chain_server.game_manager import GameManager
+from word_chain_server.response_models import StartGameRequest, PlayWordRequest
 
 app = FastAPI()
 loop = asyncio.get_event_loop()
@@ -16,14 +16,6 @@ loop = asyncio.get_event_loop()
 current_dir = os.path.dirname(os.path.abspath(__file__))
 input_file = os.path.realpath(os.path.join(current_dir, 'wordlist.json'))
 game_manager = GameManager(input_file)
-
-
-class StartGameRequest(BaseModel):
-    email_address: str
-
-
-class PlayWordRequest(BaseModel):
-    word: str
 
 
 @app.post("/start_game")
@@ -90,7 +82,9 @@ async def get_history(email_address):
         return JSONResponse(status_code=status.HTTP_400_BAD_REQUEST, content={"Error": "No such user"},
                             media_type="application/json")
     scores = await game_manager.get_scores(email_address)
-    return JSONResponse(status_code=status.HTTP_200_OK, content=scores, media_type="application/json")
+    return JSONResponse(status_code=status.HTTP_200_OK, content={"scores": {"user_score": scores[0],
+                                                                            "computer_score": scores[1]}},
+                        media_type="application/json")
 
 
 if __name__ == "__main__":
