@@ -71,9 +71,8 @@ class GameManager:
         await lock.acquire()
         try:
             possible_words = self.words[word[-1]]
+            possible_words = list(set(possible_words) - set(self.games_history[email_address]))
             result_word = random.choice(possible_words)
-            while result_word in self.games_history[email_address]:
-                result_word = random.choice(possible_words)
             computer_score = self.words_with_scores[result_word]
             self.games_history[email_address][result_word] = None
             scores = self._update_scores(email_address, score_computer=computer_score)
