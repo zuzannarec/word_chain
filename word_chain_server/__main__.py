@@ -36,35 +36,61 @@ async def start_game(start_game_request: StartGameRequest):
         email_address = valid.email
     except EmailNotValidError:
         return JSONResponse(status_code=status.HTTP_400_BAD_REQUEST, content={"Error": "Invalid email"})
-    await game_manager.add_game(email_address, game_id)
-    return JSONResponse(status_code=status.HTTP_200_OK, content={"gameID": game_id}, media_type="application/json")
+    msg = await game_manager.add_game(email_address, game_id)
+    return JSONResponse(status_code=status.HTTP_200_OK, content={"gameID": game_id, "msg": msg},
+                        media_type="application/json")
 
 
 @app.post("/play_word/{email_address}")
 async def play_word(email_address, play_word_request: PlayWordRequest):
+    result = await game_manager.check_user(email_address)
+    if not result:
+        return JSONResponse(status_code=status.HTTP_400_BAD_REQUEST, content={"Error": "No such user"},
+                            media_type="application/json")
     result = await game_manager.check_timeout(email_address)
     if not result:
+        await game_manager.reset(email_address)
         return JSONResponse(status_code=status.HTTP_400_BAD_REQUEST, content={"Error": "Timeout. Game finished."},
                             media_type="application/json")
     result = await game_manager.check_word(email_address, play_word_request.word)
     if not result:
         return JSONResponse(status_code=status.HTTP_400_BAD_REQUEST, content={"Error": "Invalid word"},
                             media_type="application/json")
-    computer_response = "WORD_COMPUTER"
-    return JSONResponse(status_code=status.HTTP_200_OK, content={"computer_response": computer_response},
+    computer_response, scores = await game_manager.get_computer_response(email_address, play_word_request.word)
+    return JSONResponse(status_code=status.HTTP_200_OK, content={"computer_response": computer_response,
+                                                                 "scores": {"user_score": scores[0],
+                                                                            "computer_score": scores[1]}},
                         media_type="application/json")
 
 
 @app.post("/end_game/{email_address}")
 async def end_game(email_address):
-    # TODO
+    result = await game_manager.check_user(email_address)
+    if not result:
+        return JSONResponse(status_code=status.HTTP_400_BAD_REQUEST, content={"Error": "No such user"},
+                            media_type="application/json")
+    await game_manager.reset(email_address)
     return JSONResponse(status_code=status.HTTP_200_OK)
 
 
-@app.get("/end_game/{email_address}")
+@app.get("/get_history/{email_address}")
 async def get_history(email_address):
-    # TODO
-    return JSONResponse(status_code=status.HTTP_200_OK)
+    result = await game_manager.check_user(email_address)
+    if not result:
+        return JSONResponse(status_code=status.HTTP_400_BAD_REQUEST, content={"Error": "No such user"},
+                            media_type="application/json")
+    history = await game_manager.get_history(email_address)
+    return JSONResponse(status_code=status.HTTP_200_OK, content=history, media_type="application/json")
+
+
+@app.get("/get_scores/{email_address}")
+async def get_history(email_address):
+    result = await game_manager.check_user(email_address)
+    if not result:
+        return JSONResponse(status_code=status.HTTP_400_BAD_REQUEST, content={"Error": "No such user"},
+                            media_type="application/json")
+    scores = await game_manager.get_scores(email_address)
+    return JSONResponse(status_code=status.HTTP_200_OK, content=scores, media_type="application/json")
 
 
 if __name__ == "__main__":
