@@ -21,11 +21,11 @@ def get_requirements():
 
 
 setup(
-    name="onsite_alohi",
+    name="word_chain",
     author='Zuzanna Rec',
     author_email='zuzanna.rec@gmail.com',
     use_scm_version=True,
-    description='Onsite',
+    description='Alohi onsite',
     long_description=read('README.md'),
     long_description_content_type='text/markdown',
     packages=find_packages(exclude=['tests', 'tests.*']),

@@ -1,6 +1,6 @@
 import pytest
 
-from alohi_server.fast_api_server import get_name_by_id
+from word_chain_server.utils import get_name_by_id
 
 
 @pytest.mark.asyncio

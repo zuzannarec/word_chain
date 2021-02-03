@@ -1,5 +1,5 @@
 FROM python:3.9-alpine AS base
-ARG PROJECT_NAME=onsite_alohi
+ARG PROJECT_NAME=word_chain
 ARG HOME="/home/app"
 WORKDIR ${HOME}/${PROJECT_NAME}
 
@@ -31,4 +31,4 @@ FROM base AS release
 COPY --from=package /tmp/dist /tmp/dist
 RUN pip install /tmp/dist/*.whl
 
-CMD python -m alohi_server
+CMD python -m word_chain_server

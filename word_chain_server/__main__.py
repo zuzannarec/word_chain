@@ -1,7 +1,7 @@
 import uvicorn
 from fastapi import FastAPI
 
-from alohi_server import users
+from word_chain_server import users
 
 app = FastAPI()
 app.include_router(users.router)
